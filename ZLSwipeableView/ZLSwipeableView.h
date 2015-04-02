@@ -47,6 +47,9 @@ typedef NS_ENUM(NSUInteger, ZLSwipeableViewDirection) {
     didEndSwipingView:(UIView *)view
            atLocation:(CGPoint)location;
 
+- (void)swipeableView:(ZLSwipeableView *)swipeableView
+  didEndUndoSwipeView:(UIView *)view;
+
 @end
 
 // DataSource
@@ -118,4 +121,9 @@ typedef NS_ENUM(NSUInteger, ZLSwipeableViewDirection) {
 
 /// Swipe top view to the down programmatically
 - (void)swipeTopViewToDown;
+
+/// Undo a swipe that was done in direction by animating view back to top
+- (void)undoSwipeForView:(UIView *)view
+             inDirection:(ZLSwipeableViewDirection)direction;
+
 @end

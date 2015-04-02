@@ -338,6 +338,51 @@ ZLSwipeableViewDirection ZLDirectionVectorToSwipeableViewDirection(CGVector dire
                 andCollideInRect:self.collisionRect];
 }
 
+- (void)undoSwipeForView:(UIView *)view
+             inDirection:(ZLSwipeableViewDirection)direction {
+    CGPoint outsideOriging;
+    CGSize size = self.bounds.size;
+    switch (direction) {
+        case ZLSwipeableViewDirectionLeft:
+            outsideOriging = CGPointMake(-size.width, .0f);
+            break;
+        case ZLSwipeableViewDirectionRight:
+            outsideOriging = CGPointMake(size.width, .0f);
+            break;
+        case ZLSwipeableViewDirectionDown:
+            outsideOriging = CGPointMake(.0f, size.height);
+            break;
+        case ZLSwipeableViewDirectionUp:
+        default:
+            outsideOriging = CGPointMake(.0f, size.width);
+            break;
+    }
+    CGRect frame = view.frame;
+    CGRect outsideRect = {outsideOriging, frame.size};
+    [view setFrame:outsideRect];
+    [self.containerView insertSubview:view
+                         aboveSubview:self.containerView.subviews.lastObject];
+    [view addGestureRecognizer:[[ZLPanGestureRecognizer alloc]
+                                initWithTarget:self
+                                action:@selector(handlePan:)]];
+    // TODO: do with dynamic animation
+    [UIView animateWithDuration:.3f
+                          delay:.0f
+         usingSpringWithDamping:1.0f
+          initialSpringVelocity:1.0f
+                        options:0
+                     animations:^{
+                         view.center = self.swipeableViewsCenterInitial;
+                     }
+                     completion:^(BOOL finished) {
+                         [self animateSwipeableViewsIfNeeded];
+                         if ([self.delegate respondsToSelector:@selector(swipeableView:didEndUndoSwipeView:)]) {
+                             [self.delegate swipeableView:self
+                                      didEndUndoSwipeView:view];
+                         }
+                     }];
+}
+
 #pragma mark - UIDynamicAnimationHelpers
 
 - (UICollisionBehavior *)collisionBehaviorThatBoundsView:(UIView *)view
